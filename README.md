@@ -1,6 +1,6 @@
 ﻿# Intro2AI_01-Ares_Adventure
 
-2 Requirements
+2 Requirements 
 2.1 Input
 Students are required to design at least 10 different input files, named according to the structure input-01.txt, input-02.txt, ..., input-10.txt. Each input should have different parameters, such as the number of stones in the maze, the weight of each stone, or the structure of the maze. The format of the input file is as described below:
 • The first line contains a list of integers representing the weights of each stone, in the order they appear in the grid, from left to right and top to bottom.
