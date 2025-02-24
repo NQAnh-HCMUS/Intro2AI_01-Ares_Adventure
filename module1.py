@@ -1,15 +1,97 @@
-# Example file showing a circle moving on screen
+# libraries
 import pygame
+import sys
+import numpy as np
+
+# constants
+SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
+CELL_SIZE = 40
+PLAYER_SPEED = 300
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
+GRAY = (128, 128, 128)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+RED = (255, 0, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
 
 # pygame setup
 pygame.init()
-screen = pygame.display.set_mode((1280, 720))
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 clock = pygame.time.Clock()
-running = True
 dt = 0
+player_pos = pygame.Vector2(0, 0)
 
-player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
 
+first_line = ""
+
+
+# Define a function to read the text file
+def read_text_file(file_path):
+    try:
+        with open(file_path, "r") as file:
+            first_line = file.readline().strip()
+            return file.read()
+    except FileNotFoundError:
+        return "File not found."
+
+
+# Load the text from the file
+text = read_text_file("input-01.txt")
+# Set up font and color
+font = pygame.font.Font(None, CELL_SIZE)
+# Read the input file
+with open("input-01.txt", "r") as f:
+    next(f)  # skip the first line
+    # grid = [list(line.strip()) for line in f.readlines()]
+    text = f.read()
+# Split the text into lines
+lines = text.split("\n")
+
+
+# map symbols
+symbol_colors = {
+    "#": BLACK,  # Black for walls
+    " ": WHITE,  # White for free spaces
+    "$": GRAY,  # Gray for stones
+    "@": RED,  # Red for player
+}
+
+
+# Map symbols to colors based on their position in the text file
+def symbol_to_color(symbol, row, col):
+    if symbol == "#":  # Wall
+        return BLACK
+    elif symbol == " ":  # Empty space
+        return WHITE
+    elif symbol == "$":  # Stone
+        return GRAY
+    elif symbol == "@":  # Ares the Player
+        return GREEN
+    elif symbol == ".":  # Switch
+        return RED
+    elif symbol == "*":  # Stone placed on switch
+        return BLUE
+    elif symbol == "+":  # Ares the Player on a switch
+        return YELLOW
+    # Default to black if symbol is not recognized
+    return BLACK
+
+
+# Define a color board
+color_board = {
+    "#": BLACK,  # Walls
+    " ": WHITE,  # Free spaces
+    "$": GRAY,  # Stones
+    "@": GREEN,  # Ares the Player
+    ".": RED,  # Switch
+    "*": BLUE,  # Stone placed on switch
+    "+": YELLOW,  # Ares on a switch
+}
+
+# game loop
+running = True
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
@@ -20,24 +102,51 @@ while running:
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("purple")
 
-    pygame.draw.rect(screen, "green", (player_pos.x, player_pos.y, 50, 50))
+    # draw the grid
+    x = 0
+    y = 0
+    for line in lines:
+        for char in line:
+            # Set player starting position
+            # if char == "@":
+            #     player_pos.x +=CELL_SIZE* x
+            #     player_pos.y +=CELL_SIZE* y
+            # else:
+            color = color_board[char]
+            pygame.draw.rect(screen, color, (x, y, CELL_SIZE, CELL_SIZE))
+            x += CELL_SIZE
+        x = 0
+        y += CELL_SIZE
+
+    # Update the display
+    pygame.display.flip()
+
+    # Draw the player
+    pygame.draw.rect(screen, "green", (player_pos.x, player_pos.y, CELL_SIZE, CELL_SIZE))
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w]:
-        player_pos.y -= 300 * dt
+        # if player_pos.y >= 0 and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != (0, 0, 0):
+        #             player_pos.y = player_pos.y
+        player_pos.y -= CELL_SIZE
     if keys[pygame.K_s]:
-        player_pos.y += 300 * dt
+        # if player_pos.y < SCREEN_HEIGHT and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != (0, 0, 0):
+        #             player_pos.y = player_pos.y
+        player_pos.y += CELL_SIZE
     if keys[pygame.K_a]:
-        player_pos.x -= 300 * dt
+        # if player_pos.x >= 0 and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != (0, 0, 0):
+        #             player_pos.x = player_pos.x
+        player_pos.x -= CELL_SIZE
     if keys[pygame.K_d]:
-        player_pos.x += 300 * dt
+        # if player_pos.x < SCREEN_WIDTH and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != (0, 0, 0):
+        #             player_pos.x = player_pos.x
+        player_pos.x += CELL_SIZE
 
     # flip() the display to put your work on screen
     pygame.display.flip()
 
-    # limits FPS to 60
-    # dt is delta time in seconds since last frame, used for framerate-
-    # independent physics.
-    dt = clock.tick(60) / 1000
+    # limits FPS to 5
+    # dt is delta time in seconds since last frame, used for framerate-independent physics.
+    dt = clock.tick(30) / 1000
 
 pygame.quit()
