@@ -7,6 +7,7 @@ import numpy as np
 SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
 CELL_SIZE = 40
 PLAYER_SPEED = 300
+FPS = 30
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GRAY = (128, 128, 128)
@@ -94,12 +95,12 @@ color_board = {
 running = True
 while running:
     # poll for events
-    # pygame.QUIT event means the user clicked X to close your window
+    # pygame.QUIT = user clicked X to close window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-    # fill the screen with a color to wipe away anything from last frame
+    # fill screen to clean frame
     screen.fill("purple")
 
     # draw the grid
@@ -126,27 +127,27 @@ while running:
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w]:
-        # if player_pos.y >= 0 and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != (0, 0, 0):
-        #             player_pos.y = player_pos.y
+        # if player_pos.y >= 0 and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != WHITE:
+        #             player_pos.y -= CELL_SIZE
         player_pos.y -= CELL_SIZE
     if keys[pygame.K_s]:
-        # if player_pos.y < SCREEN_HEIGHT and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != (0, 0, 0):
+        # if player_pos.y < SCREEN_HEIGHT and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != WHITE:
         #             player_pos.y = player_pos.y
         player_pos.y += CELL_SIZE
     if keys[pygame.K_a]:
-        # if player_pos.x >= 0 and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != (0, 0, 0):
+        # if player_pos.x >= 0 and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != WHITE:
         #             player_pos.x = player_pos.x
         player_pos.x -= CELL_SIZE
     if keys[pygame.K_d]:
-        # if player_pos.x < SCREEN_WIDTH and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != (0, 0, 0):
+        # if player_pos.x < SCREEN_WIDTH and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != WHITE:
         #             player_pos.x = player_pos.x
         player_pos.x += CELL_SIZE
 
-    # flip() the display to put your work on screen
+    # Update the display
     pygame.display.flip()
 
-    # limits FPS to 5
+    # limits FPS to constant
     # dt is delta time in seconds since last frame, used for framerate-independent physics.
-    dt = clock.tick(30) / 1000
+    dt = clock.tick(FPS) / 1000
 
 pygame.quit()
