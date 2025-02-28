@@ -1,0 +1,48 @@
+BFS
+Steps: 69, Weight: 68, Node: 13790, Time (ms): 1975.31, Memory (MB): 6.36473
+rruullluuRlddrrrddllUdrruuurrddLruuluullDllddRddrrUUddlluuRlluurrDRDL
+
+BFS
+Steps: 69, Weight: 32, Node: 13790, Time (ms): 1998.47, Memory (MB): 6.36479
+rruullluuRlddrrrddllUdrruuurrddLruuluullDllddRddrrUUddlluuRlluurrDRDL
+
+BFS
+Steps: 69, Weight: 32, Node: 13790, Time (ms): 1960.16, Memory (MB): 6.36479
+rruullluuRlddrrrddllUdrruuurrddLruuluullDllddRddrrUUddlluuRlluurrDRDL
+
+BFS
+Steps: 69, Weight: 4028, Node: 13790, Time (ms): 1958.05, Memory (MB): 6.36479
+rruullluuRlddrrrddllUdrruuurrddLruuluullDllddRddrrUUddlluuRlluurrDRDL
+
+BFS
+Steps: 69, Weight: 56, Node: 13790, Time (ms): 1922.52, Memory (MB): 6.36479
+rruullluuRlddrrrddllUdrruuurrddLruuluullDllddRddrrUUddlluuRlluurrDRDL
+
+DFS
+Steps: 81, Weight: 66, Node: 10991, Time (ms): 1501.37, Memory (MB): 4.43066
+rruullluuRlddrrrddllUdrruuurrddLruuluullDllddRddrrUULrdrruuluulldllddRRlluurrDRDL
+
+BFS
+Steps: 69, Weight: 56, Node: 13790, Time (ms): 1927.47, Memory (MB): 6.36473
+rruullluuRlddrrrddllUdrruuurrddLruuluullDllddRddrrUUddlluuRlluurrDRDL
+
+UCS
+Steps: 104, Weight: 176, Node: 20165, Time (ms): 3158.21, Memory (MB): 8.47715
+uuUruRldlddrrruuruulDDDuulldlluRRRlldddrrdrruLLLrruuruulDDDuulldldDlddrUUUdrrdrruLLLrruuulllldRdDlddrUUU
+
+A*
+Steps: 104, Weight: 176, Node: 20156, Time (ms): 3417.91, Memory (MB): 8.47394
+uuUruRldlddrrruuruulDDDuulldlluRRRlldddrrdrruLLLrruuruulDDDuulllddDlddrUUUdrrdrruLLLrruuulllldRdDlddrUUU
+
+BFS
+Steps: 104, Weight: 176, Node: 20028, Time (ms): 2845.68, Memory (MB): 8.03152
+uuUruRldlddrrruuruulDDDuulldlluRRRldlddrrdrruLLLrruuruulDDDuulldldDlddrUUUdrrdrruLLLrruuulllldRdDlddrUUU
+
+Swarm Algorithm
+Steps: 104, Weight: 176, Node: 32291, Time (ms): 5765.13, Memory (MB): 16.48526
+uuUruRldlddrrruuruulDDDuulldlluRRRlldddrrdrruLLLrruuruulDDDuulllddDlddrUUUdrrdrruLLLrruuulllldRdDlddrUUU
+
+A*
+Steps: 75, Weight: 40, Node: 13244, Time (ms): 2237.29, Memory (MB): 5.87047
+rruullluuRlddrrrddllUdrruuuruullDllddRRlddrruUllluurrurrddrddLruuluulldDRdL
+
