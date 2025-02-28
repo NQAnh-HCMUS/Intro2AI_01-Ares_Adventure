@@ -1,11 +1,9 @@
-import pygame
-# Window dimensions
-WIDTH, HEIGHT = 800, 600
+from constants import *
 
 # Player class
 class Player:
     def __init__(self):
-        self.position = pygame.math.Vector2(WIDTH / 2, HEIGHT / 2)
+        self.position = pygame.math.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
         self.velocity = pygame.math.Vector2(0, 0)
 
     def update(self):

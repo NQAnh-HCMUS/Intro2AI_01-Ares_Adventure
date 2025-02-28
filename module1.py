@@ -1,21 +1,5 @@
-# libraries
-import pygame
-import sys
-import numpy as np
-
-# constants
-SCREEN_WIDTH, SCREEN_HEIGHT = 1280, 720
-CELL_SIZE = 40
-PLAYER_SPEED = 300
-FPS = 30
-WHITE = (255, 255, 255)
-BLACK = (0, 0, 0)
-GRAY = (128, 128, 128)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-BLUE = (0, 0, 255)
-YELLOW = (255, 255, 0)
+# libraries & constant values
+from constants import *
 
 # pygame setup
 pygame.init()
