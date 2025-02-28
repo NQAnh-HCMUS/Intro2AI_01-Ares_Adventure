@@ -1,6 +1,6 @@
 # libraries & constant values
 from constants import *
-
+from player import Player
 # pygame setup
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -35,14 +35,6 @@ with open("input-01.txt", "r") as f:
 lines = text.split("\n")
 
 
-# map symbols
-symbol_colors = {
-    "#": BLACK,  # Black for walls
-    " ": WHITE,  # White for free spaces
-    "$": GRAY,  # Gray for stones
-    "@": RED,  # Red for player
-}
-
 
 # Map symbols to colors based on their position in the text file
 def symbol_to_color(symbol, row, col):
@@ -64,16 +56,11 @@ def symbol_to_color(symbol, row, col):
     return BLACK
 
 
-# Define a color board
-color_board = {
-    "#": BLACK,  # Walls
-    " ": WHITE,  # Free spaces
-    "$": GRAY,  # Stones
-    "@": GREEN,  # Ares the Player
-    ".": RED,  # Switch
-    "*": BLUE,  # Stone placed on switch
-    "+": YELLOW,  # Ares on a switch
-}
+
+
+
+# # Create player
+player = Player()
 
 # game loop
 running = True
@@ -106,26 +93,11 @@ while running:
     # Update the display
     pygame.display.flip()
 
-    # Draw the player
-    pygame.draw.rect(screen, "green", (player_pos.x, player_pos.y, CELL_SIZE, CELL_SIZE))
+    player.update()
 
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_w]:
-        # if player_pos.y >= 0 and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != WHITE:
-        #             player_pos.y -= CELL_SIZE
-        player_pos.y -= CELL_SIZE
-    if keys[pygame.K_s]:
-        # if player_pos.y < SCREEN_HEIGHT and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != WHITE:
-        #             player_pos.y = player_pos.y
-        player_pos.y += CELL_SIZE
-    if keys[pygame.K_a]:
-        # if player_pos.x >= 0 and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != WHITE:
-        #             player_pos.x = player_pos.x
-        player_pos.x -= CELL_SIZE
-    if keys[pygame.K_d]:
-        # if player_pos.x < SCREEN_WIDTH and color_board[lines[player_pos.y // CELL_SIZE][player_pos.x // CELL_SIZE]] != WHITE:
-        #             player_pos.x = player_pos.x
-        player_pos.x += CELL_SIZE
+    # Draw player
+    pygame.draw.circle(screen, (255, 0, 0), (int(player.position.x), int(player.position.y)), 10)
+
 
     # Update the display
     pygame.display.flip()

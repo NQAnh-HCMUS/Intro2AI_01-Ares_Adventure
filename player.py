@@ -1,3 +1,4 @@
+# Description: This file contains the Player class which is responsible for handling the player's movement and input.
 from constants import *
 
 # Player class
@@ -9,13 +10,13 @@ class Player:
     def update(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_w]:
-            self.velocity.y -= 0.1
+            self.velocity.y -= PLAYER_SPEED 
         if keys[pygame.K_s]:
-            self.velocity.y += 0.1
+            self.velocity.y += PLAYER_SPEED
         if keys[pygame.K_a]:
-            self.velocity.x -= 0.1
+            self.velocity.x -= PLAYER_SPEED
         if keys[pygame.K_d]:
-            self.velocity.x += 0.1
+            self.velocity.x += PLAYER_SPEED
 
         self.position += self.velocity
         self.velocity *= 0.9
