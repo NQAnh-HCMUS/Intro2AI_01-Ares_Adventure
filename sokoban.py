@@ -6,10 +6,6 @@ import os
 import queue
 from collections import deque
 import tracemalloc
-
-from game import Game
-from algorithms import *
-
 #######################
 #  THIẾT LẬP CHUNG    #
 #######################
@@ -40,7 +36,7 @@ def log_debug(*args):
 ########################
 
 def map_open(level):
-    level_path = f"levels/input-{level}.txt"
+    level_path = f"levels/level_{level}.txt"
     if not os.path.exists(level_path):
         print(f"ERROR: File {level_path} not found!")
         sys.exit(1)
@@ -79,6 +75,178 @@ def map_open(level):
     log_debug("Loaded level:", level, "Box weights:", box_weights)
     return matrix, box_weights
 
+################################
+#   LỚP GAME VÀ CÁC PHƯƠNG THỨC  #
+################################
+
+class Game:
+    def __init__(self, matrix, box_weights):
+        self.heuristic = 0
+        self.pathSol = ""
+        self.stack = []
+        self.matrix = matrix
+        self.box_weights = box_weights
+
+    def __lt__(self, other):
+        return self.heuristic < other.heuristic
+
+    def load_size(self):
+        max_width = max(len(row) for row in self.matrix)
+        height = len(self.matrix)
+        return (max_width * 32, height * 32)
+
+    def print_matrix(self):
+        for row in self.matrix:
+            print("".join(row))
+
+    def get_matrix(self):
+        return self.matrix
+
+    def is_valid_value(self, char):
+        return char in [' ', '#', '@', '.', '*', '$', '+']
+
+    def get_content(self, x, y):
+        return self.matrix[y][x]
+
+    def set_content(self, x, y, content):
+        if self.is_valid_value(content):
+            self.matrix[y][x] = content
+
+    def worker(self):
+        for y, row in enumerate(self.matrix):
+            for x, val in enumerate(row):
+                if val in ['@', '+']:
+                    return (x, y, val)
+        return None
+
+    def box_list(self):
+        boxes = []
+        for y, row in enumerate(self.matrix):
+            for x, val in enumerate(row):
+                if val in ['$', '*']:
+                    boxes.append((x, y))
+        return boxes
+
+    def dock_list(self):
+        docks = []
+        for y, row in enumerate(self.matrix):
+            for x, val in enumerate(row):
+                if val in ['.', '*', '+']:
+                    docks.append((x, y))
+        return docks
+
+    def can_move(self, dx, dy):
+        w = self.worker()
+        if not w:
+            return False
+        wx, wy, _ = w
+        content = self.get_content(wx + dx, wy + dy)
+        return content not in ['#', '$', '*']
+
+    def next(self, dx, dy):
+        w = self.worker()
+        if not w:
+            return None
+        wx, wy, _ = w
+        return self.get_content(wx + dx, wy + dy)
+
+    def can_push(self, dx, dy):
+        w = self.worker()
+        if not w:
+            return False
+        wx, wy, _ = w
+        first_cell = self.get_content(wx + dx, wy + dy)
+        if first_cell not in ['$', '*']:
+            return False
+        second_cell = self.get_content(wx + 2*dx, wy + 2*dy)
+        return second_cell in [' ', '.']
+
+    def is_completed(self):
+        for row in self.matrix:
+            if '$' in row:
+                return False
+        return True
+
+    def move_box(self, x, y, dx, dy):
+        current_box = self.get_content(x, y)
+        future_box = self.get_content(x + dx, y + dy)
+        if current_box == '$' and future_box == ' ':
+            self.set_content(x + dx, y + dy, '$')
+            self.set_content(x, y, ' ')
+        elif current_box == '$' and future_box == '.':
+            self.set_content(x + dx, y + dy, '*')
+            self.set_content(x, y, ' ')
+        elif current_box == '*' and future_box == ' ':
+            self.set_content(x + dx, y + dy, '$')
+            self.set_content(x, y, '.')
+        elif current_box == '*' and future_box == '.':
+            self.set_content(x + dx, y + dy, '*')
+            self.set_content(x, y, '.')
+
+    def unmove(self):
+        if len(self.stack) > 0:
+            movement = self.stack.pop()
+            if movement[2]:
+                current = self.worker()
+                self.move(movement[0] * -1, movement[1] * -1, False)
+                self.move_box(current[0] + movement[0], current[1] + movement[1],
+                              movement[0] * -1, movement[1] * -1)
+            else:
+                self.move(movement[0] * -1, movement[1] * -1, False)
+
+    def move(self, dx, dy, save):
+        if self.can_move(dx, dy):
+            wx, wy, wv = self.worker()
+            future = self.next(dx, dy)
+            if wv == '@' and future == ' ':
+                self.set_content(wx + dx, wy + dy, '@')
+                self.set_content(wx, wy, ' ')
+                if save: self.stack.append((dx, dy, False))
+            elif wv == '@' and future == '.':
+                self.set_content(wx + dx, wy + dy, '+')
+                self.set_content(wx, wy, ' ')
+                if save: self.stack.append((dx, dy, False))
+            elif wv == '+' and future == ' ':
+                self.set_content(wx + dx, wy + dy, '@')
+                self.set_content(wx, wy, '.')
+                if save: self.stack.append((dx, dy, False))
+            elif wv == '+' and future == '.':
+                self.set_content(wx + dx, wy + dy, '+')
+                self.set_content(wx, wy, '.')
+                if save: self.stack.append((dx, dy, False))
+        elif self.can_push(dx, dy):
+            wx, wy, wv = self.worker()
+            # Gọi move_box để cập nhật vị trí của box
+            self.move_box(wx + dx, wy + dy, dx, dy)
+            # Worker di chuyển vào vị trí cũ của box
+            if wv == '@':
+                self.set_content(wx, wy, ' ')
+            else:
+                self.set_content(wx, wy, '.')
+            # Worker di chuyển đến vị trí box vừa được đẩy
+            next_cell = self.get_content(wx + dx, wy + dy)
+            if next_cell == '.':
+                self.set_content(wx + dx, wy + dy, '+')
+            else:
+                self.set_content(wx + dx, wy + dy, '@')
+            if save:
+                self.stack.append((dx, dy, True))
+
+    def move_with_cost(self, dx, dy, save):
+        cost = 1
+        if self.can_push(dx, dy):
+            wx, wy, _ = self.worker()
+            box_x = wx + dx
+            box_y = wy + dy
+            weight = self.box_weights.get((box_x, box_y), 1)
+            cost += weight
+            new_box_x = box_x + dx
+            new_box_y = box_y + dy
+            self.box_weights[(new_box_x, new_box_y)] = weight
+            if (box_x, box_y) in self.box_weights:
+                del self.box_weights[(box_x, box_y)]
+        self.move(dx, dy, save)
+        return cost
 
 ##############################
 # HÀM KIỂM TRA DEADLOCK ĐƠN #
@@ -111,6 +279,35 @@ def is_deadlock(state):
     return False
 
 
+#######################################
+#     HÀM TÍNH HEURISTIC ĐƠN GIẢN    #
+#######################################
+
+def get_distance(state):
+    sum_dist = 0
+    boxes = state.box_list()
+    docks = state.dock_list()
+    for b in boxes:
+        best = 999999
+        for d in docks:
+            dist = abs(d[0] - b[0]) + abs(d[1] - b[1])
+            if dist < best:
+                best = dist
+        sum_dist += best
+    return sum_dist
+
+def worker_to_box(state):
+    w = state.worker()
+    if not w:
+        return 0
+    wx, wy, _ = w
+    min_dist = 999999
+    for (bx, by) in state.box_list():
+        dist = abs(wx - bx) + abs(wy - by)
+        if dist < min_dist:
+            min_dist = dist
+    return min_dist
+
 ############################
 #     REPLAY GIẢI PHÁP     #
 ############################
@@ -137,7 +334,340 @@ def replay_solution(original_game, solution_path):
             replayed.append(mv.lower())
     return "".join(replayed), len(solution_path), total_weight
 
+############################
+#     HÀM TÌM KIẾM CƠ BẢN  #
+############################
 
+def validMove(state):
+    moves = []
+    directions = [('U', 0, -1), ('D', 0, 1), ('L', -1, 0), ('R', 1, 0)]
+    for (m, dx, dy) in directions:
+        if state.can_move(dx, dy) or state.can_push(dx, dy):
+            moves.append(m)
+    return moves
+
+def BFSsolution(game):
+    print("Processing BFS...")
+    start_time = time.time()
+    node_generated = 0
+    init_state = copy.deepcopy(game)
+    visited = set()
+    visited.add(tuple(map(tuple, init_state.get_matrix())))
+    q = deque()
+    q.append(init_state)
+    while q:
+        if (time.time() - start_time) >= TIME_LIMITED:
+            print("Time Out!")
+            return ("TimeOut", node_generated)
+        cur = q.popleft()
+        if cur.is_completed():
+            print("BFS found solution:", cur.pathSol)
+            return (cur.pathSol, node_generated)
+        for mv in validMove(cur):
+            new_st = copy.deepcopy(cur)
+            node_generated += 1
+            if mv == 'U':
+                new_st.move(0, -1, False)
+            elif mv == 'D':
+                new_st.move(0, 1, False)
+            elif mv == 'L':
+                new_st.move(-1, 0, False)
+            elif mv == 'R':
+                new_st.move(1, 0, False)
+            new_st.pathSol += mv
+            mkey = tuple(map(tuple, new_st.get_matrix()))
+            if mkey not in visited:
+                visited.add(mkey)
+                q.append(new_st)
+    print("No Solution!")
+    return ("NoSol", node_generated)
+
+def DFSsolution(game):
+    print("Processing DFS...")
+    start_time = time.time()
+    node_generated = 0
+    stack = [copy.deepcopy(game)]
+    visited = set()
+    visited.add(tuple(map(tuple, game.get_matrix())))
+    
+    while stack:
+        if time.time() - start_time >= TIME_LIMITED:
+            print("Time Out!")
+            return ("TimeOut", node_generated)
+        
+        current_state = stack.pop()
+        if current_state.is_completed():
+            print("DFS found solution:", current_state.pathSol)
+            return (current_state.pathSol, node_generated)
+        
+        for mv in validMove(current_state):
+            new_state = copy.deepcopy(current_state)
+            node_generated += 1
+            if mv == 'U':
+                new_state.move(0, -1, False)
+            elif mv == 'D':
+                new_state.move(0, 1, False)
+            elif mv == 'L':
+                new_state.move(-1, 0, False)
+            elif mv == 'R':
+                new_state.move(1, 0, False)
+            new_state.pathSol += mv
+            mkey = tuple(map(tuple, new_state.get_matrix()))
+            if mkey not in visited:
+                visited.add(mkey)
+                stack.append(new_state)
+    print("No Solution!")
+    return ("NoSol", node_generated)
+
+def UCSsolution(game):
+    print("Processing UCS...")
+    start_time = time.time()
+    node_generated = 0
+    init_state = copy.deepcopy(game)
+    cost_so_far = { tuple(map(tuple, init_state.get_matrix())): 0 }
+    frontier = queue.PriorityQueue()
+    frontier.put((0, init_state))
+    
+    while not frontier.empty():
+        if time.time() - start_time >= TIME_LIMITED:
+            print("Time Out!")
+            return ("TimeOut", node_generated)
+        
+        current_cost, current_state = frontier.get()
+        if current_state.is_completed():
+            print("UCS found solution:", current_state.pathSol)
+            return (current_state.pathSol, node_generated)
+        
+        for mv in validMove(current_state):
+            new_state = copy.deepcopy(current_state)
+            node_generated += 1
+            if mv == 'U':
+                action_cost = new_state.move_with_cost(0, -1, False)
+            elif mv == 'D':
+                action_cost = new_state.move_with_cost(0, 1, False)
+            elif mv == 'L':
+                action_cost = new_state.move_with_cost(-1, 0, False)
+            elif mv == 'R':
+                action_cost = new_state.move_with_cost(1, 0, False)
+            new_state.pathSol += mv
+            new_key = tuple(map(tuple, new_state.get_matrix()))
+            new_total = current_cost + action_cost
+            old_cost = cost_so_far.get(new_key, float('inf'))
+            if new_total < old_cost:
+                cost_so_far[new_key] = new_total
+                frontier.put((new_total, new_state))
+    print("No Solution!")
+    return ("NoSol", node_generated)
+
+def GreedyBestFirstSolution(game):
+    print("Processing Greedy Best-first Search...")
+    start_time = time.time()
+    node_generated = 0
+    init_state = copy.deepcopy(game)
+    frontier = queue.PriorityQueue()
+    frontier.put((get_distance(init_state), init_state))
+    visited = set()
+    visited.add(tuple(map(tuple, init_state.get_matrix())))
+    
+    while not frontier.empty():
+        if time.time() - start_time >= TIME_LIMITED:
+            print("Time Out!")
+            return ("TimeOut", node_generated)
+        h, current_state = frontier.get()
+        if current_state.is_completed():
+            print("Greedy Best-first found solution:", current_state.pathSol)
+            return (current_state.pathSol, node_generated)
+        
+        for mv in validMove(current_state):
+            new_state = copy.deepcopy(current_state)
+            node_generated += 1
+            if mv == 'U':
+                new_state.move(0, -1, False)
+            elif mv == 'D':
+                new_state.move(0, 1, False)
+            elif mv == 'L':
+                new_state.move(-1, 0, False)
+            elif mv == 'R':
+                new_state.move(1, 0, False)
+            new_state.pathSol += mv
+            mkey = tuple(map(tuple, new_state.get_matrix()))
+            if mkey not in visited:
+                visited.add(mkey)
+                frontier.put((get_distance(new_state), new_state))
+    print("No Solution!")
+    return ("NoSol", node_generated)
+
+def SwarmSolution(game):
+    print("Processing Swarm Search...")
+    start_time = time.time()
+    node_generated = 0
+    init_state = copy.deepcopy(game)
+    g_value = { tuple(map(tuple, init_state.get_matrix())): 0 }
+    
+    def swarm_heuristic(state):
+        return min(get_distance(state), worker_to_box(state))
+    
+    f_init = g_value[tuple(map(tuple, init_state.get_matrix()))] + swarm_heuristic(init_state)
+    frontier = queue.PriorityQueue()
+    frontier.put((f_init, init_state))
+    visited = set()
+    
+    while not frontier.empty():
+        if time.time() - start_time >= TIME_LIMITED:
+            print("Time Out!")
+            return ("TimeOut", node_generated)
+        cur_f, cur_state = frontier.get()
+        if cur_state.is_completed():
+            print("Swarm Search found solution:", cur_state.pathSol)
+            return (cur_state.pathSol, node_generated)
+        mkey = tuple(map(tuple, cur_state.get_matrix()))
+        visited.add(mkey)
+        for mv in validMove(cur_state):
+            new_state = copy.deepcopy(cur_state)
+            node_generated += 1
+            if mv == 'U':
+                action_cost = new_state.move_with_cost(0, -1, False)
+            elif mv == 'D':
+                action_cost = new_state.move_with_cost(0, 1, False)
+            elif mv == 'L':
+                action_cost = new_state.move_with_cost(-1, 0, False)
+            elif mv == 'R':
+                action_cost = new_state.move_with_cost(1, 0, False)
+            new_state.pathSol += mv
+            new_key = tuple(map(tuple, new_state.get_matrix()))
+            if new_key not in visited:
+                g_new = g_value[mkey] + action_cost
+                g_value[new_key] = g_new
+                f_new = g_new + swarm_heuristic(new_state)
+                frontier.put((f_new, new_state))
+    print("No Solution!")
+    return ("NoSol", node_generated)
+
+def ConvergentSwarmSolution(game):
+    print("Processing Convergent Swarm Search...")
+    start_time = time.time()
+    node_generated = 0
+    init_state = copy.deepcopy(game)
+    g_value = { tuple(map(tuple, init_state.get_matrix())): 0 }
+    
+    def convergent_heuristic(state):
+        return (get_distance(state) + worker_to_box(state)) / 2.0
+    
+    f_init = g_value[tuple(map(tuple, init_state.get_matrix()))] + convergent_heuristic(init_state)
+    frontier = queue.PriorityQueue()
+    frontier.put((f_init, init_state))
+    visited = set()
+    
+    while not frontier.empty():
+        if time.time() - start_time >= TIME_LIMITED:
+            print("Time Out!")
+            return ("TimeOut", node_generated)
+        cur_f, cur_state = frontier.get()
+        if cur_state.is_completed():
+            print("Convergent Swarm found solution:", cur_state.pathSol)
+            return (cur_state.pathSol, node_generated)
+        mkey = tuple(map(tuple, cur_state.get_matrix()))
+        for mv in validMove(cur_state):
+            new_state = copy.deepcopy(cur_state)
+            node_generated += 1
+            if mv == 'U':
+                action_cost = new_state.move_with_cost(0, -1, False)
+            elif mv == 'D':
+                action_cost = new_state.move_with_cost(0, 1, False)
+            elif mv == 'L':
+                action_cost = new_state.move_with_cost(-1, 0, False)
+            elif mv == 'R':
+                action_cost = new_state.move_with_cost(1, 0, False)
+            new_state.pathSol += mv
+            new_key = tuple(map(tuple, new_state.get_matrix()))
+            if new_key not in visited:
+                g_new = g_value[mkey] + action_cost
+                g_value[new_key] = g_new
+                f_new = g_new + convergent_heuristic(new_state)
+                frontier.put((f_new, new_state))
+        visited.add(mkey)
+    print("No Solution!")
+    return ("NoSol", node_generated)
+
+
+def DijkstraSolution(game):
+    print("Processing Dijkstra...")
+    start_time = time.time()
+    node_generated = 0
+    init_state = copy.deepcopy(game)
+    cost_so_far = { tuple(map(tuple, init_state.get_matrix())): 0 }
+    frontier = queue.PriorityQueue()
+    frontier.put((0, init_state))
+    while not frontier.empty():
+        if (time.time() - start_time) >= TIME_LIMITED:
+            print("Time Out!")
+            return ("TimeOut", node_generated)
+        cur_cost, cur_st = frontier.get()
+        if cur_st.is_completed():
+            print("Dijkstra found solution:", cur_st.pathSol)
+            return (cur_st.pathSol, node_generated)
+        for mv in validMove(cur_st):
+            new_st = copy.deepcopy(cur_st)
+            node_generated += 1
+            if mv == 'U':
+                action_cost = new_st.move_with_cost(0, -1, False)
+            elif mv == 'D':
+                action_cost = new_st.move_with_cost(0, 1, False)
+            elif mv == 'L':
+                action_cost = new_st.move_with_cost(-1, 0, False)
+            elif mv == 'R':
+                action_cost = new_st.move_with_cost(1, 0, False)
+            new_st.pathSol += mv
+            new_mkey = tuple(map(tuple, new_st.get_matrix()))
+            new_total = cur_cost + action_cost
+            old_val = cost_so_far.get(new_mkey, 999999)
+            if new_total < old_val:
+                cost_so_far[new_mkey] = new_total
+                frontier.put((new_total, new_st))
+    print("No Solution!")
+    return ("NoSol", node_generated)
+
+def AstarSolution(game):
+    print("Processing A*...")
+    start_time = time.time()
+    node_generated = 0
+    init_state = copy.deepcopy(game)
+    g_value = { tuple(map(tuple, init_state.get_matrix())): 0 }
+    def heuristic(st):
+        return get_distance(st)
+    f_init = heuristic(init_state)
+    frontier = queue.PriorityQueue()
+    frontier.put((f_init, init_state))
+    while not frontier.empty():
+        if (time.time() - start_time) >= TIME_LIMITED:
+            print("Time Out!")
+            return ("TimeOut", node_generated)
+        cur_f, cur_st = frontier.get()
+        if cur_st.is_completed():
+            print("A* found solution:", cur_st.pathSol)
+            return (cur_st.pathSol, node_generated)
+        mkey = tuple(map(tuple, cur_st.get_matrix()))
+        for mv in validMove(cur_st):
+            new_st = copy.deepcopy(cur_st)
+            node_generated += 1
+            if mv == 'U':
+                action_cost = new_st.move_with_cost(0, -1, False)
+            elif mv == 'D':
+                action_cost = new_st.move_with_cost(0, 1, False)
+            elif mv == 'L':
+                action_cost = new_st.move_with_cost(-1, 0, False)
+            elif mv == 'R':
+                action_cost = new_st.move_with_cost(1, 0, False)
+            new_st.pathSol += mv
+            new_mkey = tuple(map(tuple, new_st.get_matrix()))
+            g_new = g_value[mkey] + action_cost
+            old_val = g_value.get(new_mkey, 999999)
+            if g_new < old_val:
+                g_value[new_mkey] = g_new
+                f_new = g_new + heuristic(new_st)
+                frontier.put((f_new, new_st))
+    print("No Solution!")
+    return ("NoSol", node_generated)
 
 #########################
 #  HÀM HỖ TRỢ PYGAME    #
@@ -282,4 +812,154 @@ def run_and_measure(algorithm_name, solve_func, base_game):
         replayed_path, steps, total_weight = replay_solution(replay_game, solution_path)
     return (solution_path, node_generated)
 
+#########################
+#   MAIN GAME LOOP      #
+#########################
+
+def main():
+    # Hỏi level từ người chơi
+    level_str = start_game()
+    matrix, box_weights = map_open(level_str)
+    original_game = Game(matrix, box_weights)
+    log_debug("Initial game state:")
+    original_game.print_matrix()
+
+    # Tạo game hiện hành từ bản sao gốc
+    game = copy.deepcopy(original_game)
+    size = game.load_size()
+    screen = pygame.display.set_mode(size)
+    clock = pygame.time.Clock()
+
+    sol = ""
+    i = 0
+    flagAuto = False
+    paused = False  # Biến để kiểm soát pause/resume
+    
+    # Các biến thống kê để hiển thị (có thể cập nhật từ run_and_measure nếu muốn)
+    steps_display = 0
+    weight_display = 0
+    
+    # Vòng lặp chính của GUI
+    while True:
+        # Vẽ maze lên màn hình
+        print_game(game.get_matrix(), screen)
+        
+        # Hiển thị thống kê (ví dụ ở góc trái trên)
+        font = pygame.font.Font(None, 24)
+        stats_text = f"Steps: {steps_display}  Weight: {weight_display}"
+        stats_surface = font.render(stats_text, True, (0, 0, 0))
+        screen.blit(stats_surface, (5, 5))
+        
+        # Nếu game hoàn thành, hiển thị thông báo và hỏi reset
+        if game.is_completed():
+            display_end(screen, "Done!")
+            # Hiển thị thông báo reset
+            display_box(screen, "Reset? (Y/N)")
+            waiting = True
+            while waiting:
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_y:
+                            game = copy.deepcopy(original_game)
+                            sol = ""
+                            i = 0
+                            flagAuto = False
+                            waiting = False
+                        elif event.key == pygame.K_n:
+                            waiting = False
+                clock.tick(10)
+        
+        pygame.display.update()
+        clock.tick(30)
+        
+        # Xử lý các sự kiện
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit(0)
+            elif event.type == pygame.KEYDOWN:
+                # Pause/Resume animation bằng SPACE
+                if event.key == pygame.K_SPACE:
+                    paused = not paused
+                # Chọn thuật toán (phím 1-8)
+                elif event.key == pygame.K_1:
+                    sol, node_generated = run_and_measure("BFS", BFSsolution, original_game)
+                    game = copy.deepcopy(original_game)
+                    i = 0
+                    flagAuto = True
+                elif event.key == pygame.K_2:
+                    sol, node_generated = run_and_measure("DFS", DFSsolution, original_game)
+                    game = copy.deepcopy(original_game)
+                    i = 0
+                    flagAuto = True
+                elif event.key == pygame.K_3:
+                    sol, node_generated = run_and_measure("UCS", UCSsolution, original_game)
+                    game = copy.deepcopy(original_game)
+                    i = 0
+                    flagAuto = True
+                elif event.key == pygame.K_4:
+                    sol, node_generated = run_and_measure("A*", AstarSolution, original_game)
+                    game = copy.deepcopy(original_game)
+                    i = 0
+                    flagAuto = True
+                elif event.key == pygame.K_5:
+                    sol, node_generated = run_and_measure("Greedy Best-first Search", GreedyBestFirstSolution, original_game)
+                    game = copy.deepcopy(original_game)
+                    i = 0
+                    flagAuto = True
+                elif event.key == pygame.K_6:
+                    sol, node_generated = run_and_measure("Dijkstra’s", DijkstraSolution, original_game)
+                    game = copy.deepcopy(original_game)
+                    i = 0
+                    flagAuto = True
+                elif event.key == pygame.K_7:
+                    sol, node_generated = run_and_measure("Swarm Algorithm", SwarmSolution, original_game)
+                    game = copy.deepcopy(original_game)
+                    i = 0
+                    flagAuto = True
+                elif event.key == pygame.K_8:
+                    sol, node_generated = run_and_measure("Convergent Swarm Algorithm", ConvergentSwarmSolution, original_game)
+                    game = copy.deepcopy(original_game)
+                    i = 0
+                    flagAuto = True
+                # Điều khiển thủ công với mũi tên
+                elif event.key == pygame.K_UP:
+                    game.move(0, -1, True)
+                elif event.key == pygame.K_DOWN:
+                    game.move(0, 1, True)
+                elif event.key == pygame.K_LEFT:
+                    game.move(-1, 0, True)
+                elif event.key == pygame.K_RIGHT:
+                    game.move(1, 0, True)
+                elif event.key == pygame.K_q:
+                    sys.exit(0)
+                elif event.key == pygame.K_x:
+                    game.unmove()
+        
+        # Nếu auto-play được bật và không bị pause, tiến hành animation
+        if flagAuto and not paused and i < len(sol):
+            step = sol[i]
+            # Khi auto-play, gọi move_with_cost để cập nhật trạng thái (và tính cost push)
+            if step == 'U':
+                game.move_with_cost(0, -1, False)
+            elif step == 'D':
+                game.move_with_cost(0, 1, False)
+            elif step == 'L':
+                game.move_with_cost(-1, 0, False)
+            elif step == 'R':
+                game.move_with_cost(1, 0, False)
+            i += 1
+            # Cập nhật các thống kê hiển thị (có thể lấy từ độ dài sol và replay_solution)
+            replay_game = copy.deepcopy(original_game)
+            replayed_path, steps, total_weight = replay_solution(replay_game, sol)
+            steps_display = steps
+            weight_display = total_weight
+            if i == len(sol):
+                flagAuto = False
+            time.sleep(0.2)
+            
+        if game.is_completed():
+            flagAuto = False
+
+if __name__ == "__main__":
+    main()
 
