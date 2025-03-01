@@ -3,7 +3,6 @@
 #########################
 from sokoban import *
 
-
 def main():
     # Hỏi level từ người chơi
     level_str = start_game()

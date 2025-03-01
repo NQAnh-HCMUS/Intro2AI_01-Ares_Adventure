@@ -111,35 +111,6 @@ def is_deadlock(state):
     return False
 
 
-#######################################
-#     HÀM TÍNH HEURISTIC ĐƠN GIẢN    #
-#######################################
-
-def get_distance(state):
-    sum_dist = 0
-    boxes = state.box_list()
-    docks = state.dock_list()
-    for b in boxes:
-        best = 999999
-        for d in docks:
-            dist = abs(d[0] - b[0]) + abs(d[1] - b[1])
-            if dist < best:
-                best = dist
-        sum_dist += best
-    return sum_dist
-
-def worker_to_box(state):
-    w = state.worker()
-    if not w:
-        return 0
-    wx, wy, _ = w
-    min_dist = 999999
-    for (bx, by) in state.box_list():
-        dist = abs(wx - bx) + abs(wy - by)
-        if dist < min_dist:
-            min_dist = dist
-    return min_dist
-
 ############################
 #     REPLAY GIẢI PHÁP     #
 ############################
