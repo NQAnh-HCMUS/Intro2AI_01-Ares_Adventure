@@ -305,7 +305,7 @@ def worker_to_box(state):
     for (bx, by) in state.box_list():
         dist = abs(wx - bx) + abs(wy - by)
         if dist < min_dist:
-            min_dist = dist
+            min_dist = dist 
     return min_dist
 
 ############################
