@@ -36,7 +36,7 @@ def log_debug(*args):
 ########################
 
 def map_open(level):
-    level_path = f"levels/level_{level}.txt"
+    level_path = f"levels/input-{level}.txt"
     if not os.path.exists(level_path):
         print(f"ERROR: File {level_path} not found!")
         sys.exit(1)
