@@ -46,3 +46,51 @@ A*
 Steps: 75, Weight: 40, Node: 13244, Time (ms): 2237.29, Memory (MB): 5.87047
 rruullluuRlddrrrddllUdrruuuruullDllddRRlddrruUllluurrurrddrddLruuluulldDRdL
 
+BFS
+Steps: 12, Weight: 26, Node: 13305, Time (ms): 4030.52, Memory (MB): 9.66269
+llUUUrRRdrdL
+
+DFS
+Steps: 612, Weight: 306, Node: 111160, Time (ms): 34508.22, Memory (MB): 33.40142
+rrurruulllLrrrrddllLrrruulllldlluRRRRlddrrruuLrddllldlllUdrrrrurruulLrrddllldllluUrrrrrruullllllDrrRRlddrrruuulDrdLruulllllldDrrrRlllluurrrrrrddLruulldDrdLdllllUdrrrUrrruullllllDrrurrrrddlldllllUdrrUrrrruullllllDrurrrrrddllldlllUUrurrrrrddllllURRllllUrRRRlllldddrrrrurruLruLrddlllldlluururrRlllldddrrrruUrruulDLrrdLruullllldldddrrrruUrruulllDRlllldddrrrrurruuLrddlluLrrruullllldldddrruUrrrruullDrrddlllldlluuruurDrdRlLrrdrruLruullllldldRRllddrrrrurruullDrruullllldldddrrruRlldlluururrDrrrdLruulllllldddrrrrUrruulllllldddrruRRluRllluurrrrrdddLLrruulllllldddrrrUUdrrUruulldLrdrruulDlullDDrrdrruLruullllldldddrrrruU
+
+DFS
+Steps: 612, Weight: 306, Node: 111160, Time (ms): 34702.32, Memory (MB): 33.39800
+rrurruulllLrrrrddllLrrruulllldlluRRRRlddrrruuLrddllldlllUdrrrrurruulLrrddllldllluUrrrrrruullllllDrrRRlddrrruuulDrdLruulllllldDrrrRlllluurrrrrrddLruulldDrdLdllllUdrrrUrrruullllllDrrurrrrddlldllllUdrrUrrrruullllllDrurrrrrddllldlllUUrurrrrrddllllURRllllUrRRRlllldddrrrrurruLruLrddlllldlluururrRlllldddrrrruUrruulDLrrdLruullllldldddrrrruUrruulllDRlllldddrrrrurruuLrddlluLrrruullllldldddrruUrrrruullDrrddlllldlluuruurDrdRlLrrdrruLruullllldldRRllddrrrrurruullDrruullllldldddrrruRlldlluururrDrrrdLruulllllldddrrrrUrruulllllldddrruRRluRllluurrrrrdddLLrruulllllldddrrrUUdrrUruulldLrdrruulDlullDDrrdrruLruullllldldddrrrruU
+
+BFS
+Steps: 12, Weight: 26, Node: 13305, Time (ms): 4325.85, Memory (MB): 9.51273
+llUUUrRRdrdL
+
+BFS
+Steps: 12, Weight: 26, Node: 13305, Time (ms): 3894.86, Memory (MB): 9.66253
+llUUUrRRdrdL
+
+DFS
+Steps: 612, Weight: 306, Node: 111160, Time (ms): 32777.57, Memory (MB): 33.40136
+rrurruulllLrrrrddllLrrruulllldlluRRRRlddrrruuLrddllldlllUdrrrrurruulLrrddllldllluUrrrrrruullllllDrrRRlddrrruuulDrdLruulllllldDrrrRlllluurrrrrrddLruulldDrdLdllllUdrrrUrrruullllllDrrurrrrddlldllllUdrrUrrrruullllllDrurrrrrddllldlllUUrurrrrrddllllURRllllUrRRRlllldddrrrrurruLruLrddlllldlluururrRlllldddrrrruUrruulDLrrdLruullllldldddrrrruUrruulllDRlllldddrrrrurruuLrddlluLrrruullllldldddrruUrrrruullDrrddlllldlluuruurDrdRlLrrdrruLruullllldldRRllddrrrrurruullDrruullllldldddrrruRlldlluururrDrrrdLruulllllldddrrrrUrruulllllldddrruRRluRllluurrrrrdddLLrruulllllldddrrrUUdrrUruulldLrdrruulDlullDDrrdrruLruullllldldddrrrruU
+
+UCS
+Steps: 12, Weight: 26, Node: 49569, Time (ms): 15688.64, Memory (MB): 20.74699
+llUUUrRRdrdL
+
+A*
+Steps: 12, Weight: 26, Node: 31507, Time (ms): 10203.08, Memory (MB): 14.31754
+llUUUrRRdrdL
+
+Greedy Best-first Search
+Steps: 19, Weight: 26, Node: 181, Time (ms): 51.96, Memory (MB): 0.10613
+rruLulluRRdddlllUUU
+
+Dijkstra’s
+Steps: 12, Weight: 26, Node: 49569, Time (ms): 15726.92, Memory (MB): 20.70292
+llUUUrRRdrdL
+
+Swarm Algorithm
+Steps: 12, Weight: 26, Node: 84402, Time (ms): 29360.53, Memory (MB): 36.97300
+llUUUrRRdrdL
+
+Convergent Swarm Algorithm
+Steps: 12, Weight: 26, Node: 167575, Time (ms): 62286.12, Memory (MB): 51.27456
+llUUUrRRdrdL
+

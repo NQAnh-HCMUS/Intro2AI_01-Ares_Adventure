@@ -459,6 +459,48 @@ def UCSsolution(game):
     print("No Solution!")
     return ("NoSol", node_generated)
 
+def AstarSolution(game):
+    print("Processing A*...")
+    start_time = time.time()
+    node_generated = 0
+    init_state = copy.deepcopy(game)
+    g_value = { tuple(map(tuple, init_state.get_matrix())): 0 }
+    def heuristic(st):
+        return get_distance(st)
+    f_init = heuristic(init_state)
+    frontier = queue.PriorityQueue()
+    frontier.put((f_init, init_state))
+    while not frontier.empty():
+        if (time.time() - start_time) >= TIME_LIMITED:
+            print("Time Out!")
+            return ("TimeOut", node_generated)
+        cur_f, cur_st = frontier.get()
+        if cur_st.is_completed():
+            print("A* found solution:", cur_st.pathSol)
+            return (cur_st.pathSol, node_generated)
+        mkey = tuple(map(tuple, cur_st.get_matrix()))
+        for mv in validMove(cur_st):
+            new_st = copy.deepcopy(cur_st)
+            node_generated += 1
+            if mv == 'U':
+                action_cost = new_st.move_with_cost(0, -1, False)
+            elif mv == 'D':
+                action_cost = new_st.move_with_cost(0, 1, False)
+            elif mv == 'L':
+                action_cost = new_st.move_with_cost(-1, 0, False)
+            elif mv == 'R':
+                action_cost = new_st.move_with_cost(1, 0, False)
+            new_st.pathSol += mv
+            new_mkey = tuple(map(tuple, new_st.get_matrix()))
+            g_new = g_value[mkey] + action_cost
+            old_val = g_value.get(new_mkey, 999999)
+            if g_new < old_val:
+                g_value[new_mkey] = g_new
+                f_new = g_new + heuristic(new_st)
+                frontier.put((f_new, new_st))
+    print("No Solution!")
+    return ("NoSol", node_generated)
+
 def GreedyBestFirstSolution(game):
     print("Processing Greedy Best-first Search...")
     start_time = time.time()
@@ -494,6 +536,43 @@ def GreedyBestFirstSolution(game):
             if mkey not in visited:
                 visited.add(mkey)
                 frontier.put((get_distance(new_state), new_state))
+    print("No Solution!")
+    return ("NoSol", node_generated)
+
+def DijkstraSolution(game):
+    print("Processing Dijkstra...")
+    start_time = time.time()
+    node_generated = 0
+    init_state = copy.deepcopy(game)
+    cost_so_far = { tuple(map(tuple, init_state.get_matrix())): 0 }
+    frontier = queue.PriorityQueue()
+    frontier.put((0, init_state))
+    while not frontier.empty():
+        if (time.time() - start_time) >= TIME_LIMITED:
+            print("Time Out!")
+            return ("TimeOut", node_generated)
+        cur_cost, cur_st = frontier.get()
+        if cur_st.is_completed():
+            print("Dijkstra found solution:", cur_st.pathSol)
+            return (cur_st.pathSol, node_generated)
+        for mv in validMove(cur_st):
+            new_st = copy.deepcopy(cur_st)
+            node_generated += 1
+            if mv == 'U':
+                action_cost = new_st.move_with_cost(0, -1, False)
+            elif mv == 'D':
+                action_cost = new_st.move_with_cost(0, 1, False)
+            elif mv == 'L':
+                action_cost = new_st.move_with_cost(-1, 0, False)
+            elif mv == 'R':
+                action_cost = new_st.move_with_cost(1, 0, False)
+            new_st.pathSol += mv
+            new_mkey = tuple(map(tuple, new_st.get_matrix()))
+            new_total = cur_cost + action_cost
+            old_val = cost_so_far.get(new_mkey, 999999)
+            if new_total < old_val:
+                cost_so_far[new_mkey] = new_total
+                frontier.put((new_total, new_st))
     print("No Solution!")
     return ("NoSol", node_generated)
 
@@ -590,84 +669,7 @@ def ConvergentSwarmSolution(game):
     return ("NoSol", node_generated)
 
 
-def DijkstraSolution(game):
-    print("Processing Dijkstra...")
-    start_time = time.time()
-    node_generated = 0
-    init_state = copy.deepcopy(game)
-    cost_so_far = { tuple(map(tuple, init_state.get_matrix())): 0 }
-    frontier = queue.PriorityQueue()
-    frontier.put((0, init_state))
-    while not frontier.empty():
-        if (time.time() - start_time) >= TIME_LIMITED:
-            print("Time Out!")
-            return ("TimeOut", node_generated)
-        cur_cost, cur_st = frontier.get()
-        if cur_st.is_completed():
-            print("Dijkstra found solution:", cur_st.pathSol)
-            return (cur_st.pathSol, node_generated)
-        for mv in validMove(cur_st):
-            new_st = copy.deepcopy(cur_st)
-            node_generated += 1
-            if mv == 'U':
-                action_cost = new_st.move_with_cost(0, -1, False)
-            elif mv == 'D':
-                action_cost = new_st.move_with_cost(0, 1, False)
-            elif mv == 'L':
-                action_cost = new_st.move_with_cost(-1, 0, False)
-            elif mv == 'R':
-                action_cost = new_st.move_with_cost(1, 0, False)
-            new_st.pathSol += mv
-            new_mkey = tuple(map(tuple, new_st.get_matrix()))
-            new_total = cur_cost + action_cost
-            old_val = cost_so_far.get(new_mkey, 999999)
-            if new_total < old_val:
-                cost_so_far[new_mkey] = new_total
-                frontier.put((new_total, new_st))
-    print("No Solution!")
-    return ("NoSol", node_generated)
 
-def AstarSolution(game):
-    print("Processing A*...")
-    start_time = time.time()
-    node_generated = 0
-    init_state = copy.deepcopy(game)
-    g_value = { tuple(map(tuple, init_state.get_matrix())): 0 }
-    def heuristic(st):
-        return get_distance(st)
-    f_init = heuristic(init_state)
-    frontier = queue.PriorityQueue()
-    frontier.put((f_init, init_state))
-    while not frontier.empty():
-        if (time.time() - start_time) >= TIME_LIMITED:
-            print("Time Out!")
-            return ("TimeOut", node_generated)
-        cur_f, cur_st = frontier.get()
-        if cur_st.is_completed():
-            print("A* found solution:", cur_st.pathSol)
-            return (cur_st.pathSol, node_generated)
-        mkey = tuple(map(tuple, cur_st.get_matrix()))
-        for mv in validMove(cur_st):
-            new_st = copy.deepcopy(cur_st)
-            node_generated += 1
-            if mv == 'U':
-                action_cost = new_st.move_with_cost(0, -1, False)
-            elif mv == 'D':
-                action_cost = new_st.move_with_cost(0, 1, False)
-            elif mv == 'L':
-                action_cost = new_st.move_with_cost(-1, 0, False)
-            elif mv == 'R':
-                action_cost = new_st.move_with_cost(1, 0, False)
-            new_st.pathSol += mv
-            new_mkey = tuple(map(tuple, new_st.get_matrix()))
-            g_new = g_value[mkey] + action_cost
-            old_val = g_value.get(new_mkey, 999999)
-            if g_new < old_val:
-                g_value[new_mkey] = g_new
-                f_new = g_new + heuristic(new_st)
-                frontier.put((f_new, new_st))
-    print("No Solution!")
-    return ("NoSol", node_generated)
 
 #########################
 #  HÀM HỖ TRỢ PYGAME    #
