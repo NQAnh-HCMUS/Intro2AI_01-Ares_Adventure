@@ -1,3 +1,5 @@
+Contributors: ddinhthuan
+
 How to run source code:
 1. Open main.py
 2. Press Debug/Start Debugging (or press F5)
