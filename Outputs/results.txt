@@ -98,3 +98,7 @@ BFS
 Steps: 12, Weight: 26, Node: 13305, Time (ms): 3813.74, Memory (MB): 9.66110
 llUUUrRRdrdL
 
+BFS
+Steps: 12, Weight: 26, Node: 13305, Time (ms): 3945.94, Memory (MB): 9.66010
+llUUUrRRdrdL
+
