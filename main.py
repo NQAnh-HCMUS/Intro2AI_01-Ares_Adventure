@@ -36,7 +36,7 @@ def log_debug(*args):
 ########################
 
 def map_open(level):
-    level_path = f"levels/input-{level}.txt"
+    level_path = f"Inputs/input-{level}.txt"
     if not os.path.exists(level_path):
         print(f"ERROR: File {level_path} not found!")
         sys.exit(1)
@@ -792,7 +792,7 @@ def run_and_measure(algorithm_name, solve_func, base_game):
     used_time = (end_time - start_time)*1000
     used_mem = end_mem - start_mem
     # Ghi kết quả ra file (append)
-    with open("results.txt", "a", encoding="utf-8") as f:
+    with open("Outputs\\results.txt", "a", encoding="utf-8") as f:
         f.write(f"{algorithm_name}\n")
         if solution_path in ["NoSol", "TimeOut", ""]:
             f.write(f"Steps: 0, Weight: 0, Node: {node_generated}, Time (ms): 0.00, Memory (MB): 0.00\n")
@@ -868,7 +868,7 @@ def main():
                             flagAuto = False
                             waiting = False
                         elif event.key == pygame.K_n:
-                            waiting = False
+                            sys.exit(0)
                 clock.tick(10)
         
         pygame.display.update()
