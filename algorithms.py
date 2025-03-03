@@ -21,7 +21,20 @@ def validMove(state):
         if state.can_move(dx, dy) or state.can_push(dx, dy):
             moves.append(m)
     return moves
-
+    
+def get_distance(state):
+    sum_dist = 0
+    boxes = state.box_list()
+    docks = state.dock_list()
+    for b in boxes:
+        best = 999999
+        for d in docks:
+            dist = abs(d[0] - b[0]) + abs(d[1] - b[1])
+            if dist < best:
+                best = dist
+        sum_dist += best
+    return sum_dist
+    
 def BFSsolution(game):
     print("Processing BFS...")
     start_time = time.time()
