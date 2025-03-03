@@ -34,7 +34,17 @@ def get_distance(state):
                 best = dist
         sum_dist += best
     return sum_dist
-    
+def worker_to_box(state):
+    w = state.worker()
+    if not w:
+        return 0
+    wx, wy, _ = w
+    min_dist = 999999
+    for (bx, by) in state.box_list():
+        dist = abs(wx - bx) + abs(wy - by)
+        if dist < min_dist:
+            min_dist = dist 
+    return min_dist
 def BFSsolution(game):
     print("Processing BFS...")
     start_time = time.time()
