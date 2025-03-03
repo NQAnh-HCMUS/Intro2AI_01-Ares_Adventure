@@ -10,18 +10,10 @@ import tracemalloc
 TIME_LIMITED = 1800
 DEBUG = True  # Bật/mở log debug
 
-############################
-#     HÀM TÌM KIẾM CƠ BẢN  #
-############################
+#######################################
+#     HÀM TÍNH HEURISTIC ĐƠN GIẢN    #
+#######################################
 
-def validMove(state):
-    moves = []
-    directions = [('U', 0, -1), ('D', 0, 1), ('L', -1, 0), ('R', 1, 0)]
-    for (m, dx, dy) in directions:
-        if state.can_move(dx, dy) or state.can_push(dx, dy):
-            moves.append(m)
-    return moves
-    
 def get_distance(state):
     sum_dist = 0
     boxes = state.box_list()
@@ -34,6 +26,7 @@ def get_distance(state):
                 best = dist
         sum_dist += best
     return sum_dist
+
 def worker_to_box(state):
     w = state.worker()
     if not w:
@@ -45,6 +38,19 @@ def worker_to_box(state):
         if dist < min_dist:
             min_dist = dist 
     return min_dist
+
+############################
+#     HÀM TÌM KIẾM CƠ BẢN  #
+############################
+
+def validMove(state):
+    moves = []
+    directions = [('U', 0, -1), ('D', 0, 1), ('L', -1, 0), ('R', 1, 0)]
+    for (m, dx, dy) in directions:
+        if state.can_move(dx, dy) or state.can_push(dx, dy):
+            moves.append(m)
+    return moves
+    
 def BFSsolution(game):
     print("Processing BFS...")
     start_time = time.time()
